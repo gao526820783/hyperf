@@ -88,10 +88,10 @@ class RegisterServiceListener implements ListenerInterface
                             if (! isset($service['publishTo'], $service['server'])) {
                                 continue;
                             }
-                            [$address, $port] = $servers[$service['server']];
+                            [$address, $port,$server_ip] = $servers[$service['server']];
                             switch ($service['publishTo']) {
                                 case 'consul':
-                                    $this->publishToConsul($address, (int) $port, $service, $serviceName, $path);
+                                    $this->publishToConsul($server_ip, (int) $port, $service, $serviceName, $path);
                                     break;
                             }
                         }
@@ -229,6 +229,7 @@ class RegisterServiceListener implements ListenerInterface
                 throw new \InvalidArgumentException('Invalid server name');
             }
             $host = $server['host'];
+            $server_ip = isset($server["server_ip"]) ? $server["server_ip"] : $host;
             if (in_array($host, ['0.0.0.0', 'localhost'])) {
                 $host = $this->getInternalIp();
             }
@@ -240,7 +241,7 @@ class RegisterServiceListener implements ListenerInterface
                 throw new \InvalidArgumentException(sprintf('Invalid port %s', $port));
             }
             $port = (int) $port;
-            $result[$server['name']] = [$host, $port];
+            $result[$server['name']] = [$host, $port,$server_ip];
         }
         return $result;
     }
